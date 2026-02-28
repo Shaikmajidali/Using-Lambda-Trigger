@@ -45,15 +45,6 @@ jobs:
     - name: List Lambda functions
       run: aws lambda list-functions
 
-    # Step 8: Trigger AWS Lambda function
-    - name: Invoke Lambda
-      run: |
-        aws lambda invoke \
-          --function-name "Docker-Lambda" \
-          --cli-binary-format raw-in-base64-out \
-          --payload file://payload.json \
-          response.json
-
     # Step 9: Show Lambda response
     - name: Show response
       run: cat response.json
