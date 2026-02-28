@@ -35,7 +35,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: ap-south-1
+        aws-region: us-south-1
 
     # Step 6: Create JSON payload file
     - name: Create payload file
