@@ -11,10 +11,9 @@ jobs:
 
     steps:
 
-    # Step 1: Checkout code
+    # Step 1: Checkout source code
     - name: Checkout code
       uses: actions/checkout@v4
-
 
     # Step 2: Login to Docker Hub
     - name: Login to Docker Hub
@@ -23,16 +22,13 @@ jobs:
         username: shaikmajidali
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-
     # Step 3: Build Docker Image
     - name: Build Docker image
       run: docker build -t shaikmajidali/my-app:latest .
 
-
     # Step 4: Push Docker Image
     - name: Push Docker image
       run: docker push shaikmajidali/my-app:latest
-
 
     # Step 5: Configure AWS credentials
     - name: Configure AWS Credentials
@@ -42,22 +38,23 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
         aws-region: ap-south-1
 
-
     # Step 6: Create JSON payload file
     - name: Create payload file
       run: echo '{"message":"New Docker Image Created"}' > payload.json
 
+    # Step 7: (Optional) List Lambda functions to debug
+    - name: List Lambda functions
+      run: aws lambda list-functions
 
-    # Step 7: Trigger AWS Lambda function
+    # Step 8: Trigger AWS Lambda function
     - name: Invoke Lambda
       run: |
         aws lambda invoke \
-          --function-name Docker-Lambda \
+          --function-name "Docker-Lambda" \
           --cli-binary-format raw-in-base64-out \
           --payload file://payload.json \
           response.json
 
-
-    # Step 8: Show Lambda response
+    # Step 9: Show Lambda response
     - name: Show response
       run: cat response.json
