@@ -30,31 +30,6 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
 
-      # Optional: Tag & Push to ECR if needed
-      #- name: Login to ECR
-      #  run: |
-      #    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-      #- name: Tag image for ECR
-      #  run: docker tag ${{ secrets.DOCKER_USERNAME }}/my-app:latest ${{ secrets.ECR_REGISTRY }}/my-app:latest
-      #- name: Push to ECR
-      #  run: docker push ${{ secrets.ECR_REGISTRY }}/my-app:latest
-
-      # Step 5: Configure AWS credentials
-      
-
-      # Step 6: Create JSON payload file for Lambda
-      - name: Create payload file
-        run: |
-          echo '{
-            "detail": {
-              "repository_name": "my-app",
-              "image_tags": ["latest"],
-              "image_digest": "sha256:replace-with-your-digest"
-            }
-          }' > payload.json
-
-      # Step 7: Invoke Lambda function
-  
 
       # Step 8: Show Lambda response
       - name: Show Lambda response
