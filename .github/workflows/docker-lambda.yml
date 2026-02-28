@@ -26,9 +26,18 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:latest .
 
-      # Step 4: Push Docker Image
+      # Step 4: Push Docker Image to Docker Hub
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
+
+      # Optional: Tag & Push to ECR if needed
+      #- name: Login to ECR
+      #  run: |
+      #    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+      #- name: Tag image for ECR
+      #  run: docker tag ${{ secrets.DOCKER_USERNAME }}/my-app:latest ${{ secrets.ECR_REGISTRY }}/my-app:latest
+      #- name: Push to ECR
+      #  run: docker push ${{ secrets.ECR_REGISTRY }}/my-app:latest
 
       # Step 5: Configure AWS credentials
       - name: Configure AWS Credentials
@@ -36,7 +45,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: us-south-1
+          aws-region: ap-south-1
 
       # Step 6: Create JSON payload file for Lambda
       - name: Create payload file
