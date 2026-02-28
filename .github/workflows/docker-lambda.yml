@@ -59,13 +59,7 @@ jobs:
           }' > payload.json
 
       # Step 7: Invoke Lambda function
-      - name: Invoke Lambda
-        run: |
-          aws lambda invoke \
-            --function-name "Docker-Lambda" \
-            --cli-binary-format raw-in-base64-out \
-            --payload file://payload.json \
-            response.json
+  
 
       # Step 8: Show Lambda response
       - name: Show Lambda response
