@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Build Docker Image, Push to ECR and Trigger Lambda
 
 on:
   push:
@@ -6,22 +6,60 @@ on:
       - main
 
 jobs:
-  build:
+  build-push-trigger:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
 
-    - uses: aws-actions/configure-aws-credentials@v4
+    # Step 1: Checkout source code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+    # Step 2: Configure AWS Credentials
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
         aws-region: ap-south-1
 
-    - uses: aws-actions/amazon-ecr-login@v2
 
-    - run: docker build -t myapp .
+    # Step 3: Login to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-    - run: docker tag myapp:latest ${{ secrets.ECR_REGISTRY }}/myapp:latest
 
-    - run: docker push ${{ secrets.ECR_REGISTRY }}/myapp:latest
+    # Step 4: Build Docker Image
+    - name: Build Docker image
+      run: |
+        docker build -t myapp:latest .
+
+
+    # Step 5: Tag Docker Image
+    - name: Tag Docker image
+      run: |
+        docker tag myapp:latest ${{ secrets.ECR_REGISTRY }}/myapp:latest
+
+
+    # Step 6: Push Docker Image to ECR
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.ECR_REGISTRY }}/myapp:latest
+
+
+    # Step 7: Trigger Lambda Function
+    - name: Trigger Lambda
+      run: |
+        aws lambda invoke \
+          --function-name myLambdaFunction \
+          --region ap-south-1 \
+          --payload '{"event":"New Docker image pushed to ECR"}' \
+          response.json
+
+
+    # Step 8: Show Lambda Response
+    - name: Show response
+      run: |
+        cat response.json
