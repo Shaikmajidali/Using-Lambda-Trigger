@@ -50,12 +50,12 @@ jobs:
 
     # Step 7: Trigger AWS Lambda function
     - name: Invoke Lambda
-      run: |
-        aws lambda invoke \
-          --function-name myLambdaFunction \
-          --cli-binary-format raw-in-base64-out \
-          --payload file://payload.json \
-          response.json
+  run: |
+    aws lambda invoke \
+      --function-name Docker-Lambda \
+      --cli-binary-format raw-in-base64-out \
+      --payload file://payload.json \
+      response.json
 
 
     # Step 8: Show Lambda response
