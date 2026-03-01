@@ -1,4 +1,4 @@
-name: Build Docker Image and Trigger Lambda
+name: Build Docker Image and Notify
 
 on:
   push:
@@ -6,41 +6,47 @@ on:
       - main
 
 jobs:
-  build-push-lambda:
+  build-and-notify:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout code
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Step 2: Log in to Docker Hub
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # Step 2: Docker login
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 3: Build Docker image
-    - name: Build Docker image
-      run: |
-        docker build -t shaikmajidali/my-app:latest .
+      # Step 3: Build Docker image
+      - name: Build Docker Image
+        run: |
+          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/myapp:latest"
+          docker build -t $IMAGE_NAME .
+          echo "Docker image built: $IMAGE_NAME"
 
-    # Step 4: Push Docker image to Docker Hub
-    - name: Push Docker image
-      run: |
-        docker push shaikmajidali/my-app:latest
+      # Step 4: Push Docker image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/myapp:latest"
+          docker push $IMAGE_NAME
+          echo "Docker image pushed: $IMAGE_NAME"
 
-    # Step 5: Configure AWS credentials
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: us-east-1
+      # Step 5: Send email via AWS SES (email hardcoded)
+      - name: Send Email Notification
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          SES_EMAIL_FROM="shaikmajidali84362@gmail.com"
+          SES_EMAIL_TO="shaikmajidali84362@gmail.com"
 
-   
-
-    # Step 7: Show Lambda response
-    - name: Show Lambda response
-      run: cat response.json
+          aws ses send-email \
+            --from "$SES_EMAIL_FROM" \
+            --destination "ToAddresses=$SES_EMAIL_TO" \
+            --message "Subject={Data='Docker Image Created'},Body={Text={Data='Successfully new image created: $IMAGE_NAME'}}" \
+            --region $AWS_REGION
