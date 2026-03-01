@@ -39,13 +39,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
         aws-region: us-east-1
 
-    # Step 6: Invoke Lambda
-    - name: Invoke Lambda
-      run: |
-        aws lambda invoke \
-          --function-name Docker-Lambda \
-          --payload '{"detail": {"Using-Lambda-Trigger": "shaikmajidali/my-app", "image-tags": ["latest"], "image-digest": ""}}' \
-          response.json
+   
 
     # Step 7: Show Lambda response
     - name: Show Lambda response
